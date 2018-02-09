@@ -77,7 +77,9 @@ class BatchesController extends Controller
      */
     public function edit($id)
     {
-        //
+        $batch = Batch::find($id);
+        //dd($batch);
+        return view('batch.edit', ['batch'=>$batch]);
     }
 
     /**
@@ -89,7 +91,21 @@ class BatchesController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $validatedData = $request->validate([
+            'batch' => 'required|unique:batches',
+        ]);
+
+        $batchUpdate = Batch::where('id', $id)
+                              ->update([
+                                  'batch'=> $request->input('batch'),
+                              ]);
+
+        if($batchUpdate){
+            return redirect()->route('batches.index')
+                             ->with('success', 'Batch Updated Successfully');
+        }
+
+        return back()->withInput()->with('errors', 'Error editing new Batch');
     }
 
     /**
@@ -100,6 +116,13 @@ class BatchesController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $findBatch = Batch::find($id);
+
+        if($findBatch->delete()){
+            return redirect()->route('batches.index')
+                             ->with('success', 'Batch deleted successfully');
+        }
+
+        return back()->withInput()->with('error' , 'Batch could not be deleted');
     }
 }
